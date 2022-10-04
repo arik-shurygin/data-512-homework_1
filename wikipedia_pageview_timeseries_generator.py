@@ -1,7 +1,7 @@
 import json, time, urllib.parse, requests
 import pandas as pd
 
-from wikipedia_pageview_analysis import MOBILE_DATA_PATH
+
 
 # The REST API 'pageviews' URL - this is the common URL/endpoint for all 'pageviews' API requests
 API_REQUEST_PAGEVIEWS_ENDPOINT = 'https://wikimedia.org/api/rest_v1/metrics/pageviews/'
@@ -24,12 +24,12 @@ REQUEST_HEADERS = {
 # This is just a list of English Wikipedia article titles for the dinosaurs we are looking at
 ARTICLE_TITLES = pd.read_csv("dinosaur_names_to_links_sept_2022.csv") ["name"]
 # Start end end dates in YYYYMMDDSS format. API will search between these dates for pageview metrics
-START_DATE = "2015060100"
-END_DATE = "2022093000"
+START_DATE = "2015070100"
+END_DATE = "2022100100"
 # output path for JSON data to be stored in once API is queried.
-MOBILE_DATA_PATH = "dino_monthly_mobile_201506-202208.json"
-DESKTOP_DATA_PATH = "dino_monthly_desktop_201506-202208.json"
-COMBINED_DATA_PATH = "dino_monthly_cumulative_201506-202208.json"
+MOBILE_DATA_PATH = "dino_monthly_mobile_"+ str(START_DATE[0:6]) + "-" + str(END_DATE[0:6]) +".json"
+DESKTOP_DATA_PATH = "dino_monthly_desktop_" + str(START_DATE[0:6]) + "-" + str(END_DATE[0:6]) + ".json"
+COMBINED_DATA_PATH = "dino_monthly_cumulative_"+str(START_DATE[0:6]) + "-" + str(END_DATE[0:6])+".json"
 
 # This template is used to map parameter values into the API_REQUST_PER_ARTICLE_PARAMS portion of an API request. The dictionary has a
 # field/key for each of the required parameters. In the example, below, we only vary the article name, so the majority of the fields
@@ -93,6 +93,10 @@ def generate_mobile_monthly_pageviews(titles = ARTICLE_TITLES, start = START_DAT
     for title in titles:
         mobile_web_json = request_pageviews_per_article(article_title=title, access="mobile-web", start=start, end=end)
         mobile_app_json = request_pageviews_per_article(article_title=title, access="mobile-app", start=start, end=end)
+        if mobile_web_json is None or mobile_app_json is None:
+            print(str(title) + " NOT FOUND BY THE API")
+            mobile_jsons[title] = {}
+            continue
         if "items" not in mobile_web_json.keys() or "items" not in mobile_app_json.keys():
             print(str(title) + " NOT FOUND BY THE API")
             mobile_jsons[title] = {}
@@ -120,6 +124,10 @@ def generate_cumulative_monthly_pageviews(titles = ARTICLE_TITLES,  start = STAR
     combined_jsons = {}
     for title in titles:
         combined_json = request_pageviews_per_article(article_title=title, access="all-access", start=start, end=end)
+        if combined_json is None:
+            print(str(title) + " NOT FOUND BY THE API")
+            combined_json[title] = {}
+            continue
         if "items" not in combined_json.keys() :
             print(str(title) + "NOT FOUND BY THE LOOKUP")
             combined_jsons[title] = {}
@@ -142,6 +150,10 @@ def generate_desktop_monthly_pageviews(titles = ARTICLE_TITLES,  start = START_D
     dekstop_jsons = {}
     for title in titles:
         desktop_json = request_pageviews_per_article(article_title=title, access="desktop", start=start, end=end)
+        if desktop_json is None:
+            print(str(title) + " NOT FOUND BY THE API")
+            desktop_json[title] = {}
+            continue
         if "items" not in desktop_json.keys() :
             print(str(title) + "NOT FOUND BY THE LOOKUP")
             dekstop_jsons[title] = {}
@@ -151,16 +163,17 @@ def generate_desktop_monthly_pageviews(titles = ARTICLE_TITLES,  start = START_D
         
     return json.dumps(dekstop_jsons, indent=4)
 
-#KEY NOTE. THE API fails to find the webpages for Tuebingosaurus and Elemgasem. Thus they are given empty timeseries and will show up later in analysis!
-print("Generating Monthly Pageviews of MOBILE users")
-mobile_jsons = generate_mobile_monthly_pageviews()
-jsonFile = open(MOBILE_DATA_PATH, "w")
-jsonFile.write(mobile_jsons)
-print("Generating Monthly Pageviews of DESKTOP users")
-desktop_jsons = generate_desktop_monthly_pageviews()
-jsonFile = open(DESKTOP_DATA_PATH, "w")
-jsonFile.write(desktop_jsons)
-print("Generating Monthly Pageviews of ALL users")
-combined_jsons = generate_cumulative_monthly_pageviews()
-jsonFile = open(COMBINED_DATA_PATH, "w")
-jsonFile.write(combined_jsons)
+if __name__ == "__main__":
+    #KEY NOTE. THE API fails to find the webpages for Tuebingosaurus and Elemgasem. Thus they are given empty timeseries and will show up later in analysis!
+    print("Generating Monthly Pageviews of MOBILE users")
+    mobile_jsons = generate_mobile_monthly_pageviews()
+    jsonFile = open(MOBILE_DATA_PATH, "w")
+    jsonFile.write(mobile_jsons)
+    print("Generating Monthly Pageviews of DESKTOP users")
+    desktop_jsons = generate_desktop_monthly_pageviews()
+    jsonFile = open(DESKTOP_DATA_PATH, "w")
+    jsonFile.write(desktop_jsons)
+    print("Generating Monthly Pageviews of ALL users")
+    combined_jsons = generate_cumulative_monthly_pageviews()
+    jsonFile = open(COMBINED_DATA_PATH, "w")
+    jsonFile.write(combined_jsons)
