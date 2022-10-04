@@ -31,8 +31,8 @@ CHART_3_OUTPUT_FNAME = "lowest_availibility_pages_by_access_type.png"
 CHART_3_TITLE = "Webpages with lowest data availibility"
 
 CHART_Y_AXIS_TITLE =  "Webpage Views"
-MOBILE_DATA_PATH = "dino_monthly_mobile_201506-202208.json"
-DESKTOP_DATA_PATH = "dino_monthly_desktop_201506-202208.json"
+MOBILE_DATA_PATH = "dino_monthly_mobile_201507-202210.json"
+DESKTOP_DATA_PATH = "dino_monthly_desktop_201507-202210.json"
 
 #this function takes in paths to two JSONS generated in the wikipedia_pageview_timeseries_generator script and loads them
 def load_data(mobile_path = MOBILE_DATA_PATH, desktop_path = DESKTOP_DATA_PATH):
