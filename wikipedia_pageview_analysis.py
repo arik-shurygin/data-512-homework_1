@@ -21,13 +21,13 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import matplotlib.dates as mdates
 
-CHART_1_OUTPUT_FNAME = "highest_lowest_average_views_by_access_type.png"
+CHART_1_OUTPUT_FNAME = "highest_lowest_average_views_by_access_type_1.png"
 CHART_1_TITLE =  "Highest and lowest average views for mobile and desktop"
 
-CHART_2_OUTPUT_FNAME = "peak_viewership_pages_by_access_type.png"
+CHART_2_OUTPUT_FNAME = "peak_viewership_pages_by_access_type_1.png"
 CHART_2_TITLE = "Webpages with highest PEAK viewership across timespan"
 
-CHART_3_OUTPUT_FNAME = "lowest_availibility_pages_by_access_type.png"
+CHART_3_OUTPUT_FNAME = "lowest_availibility_pages_by_access_type_1.png"
 CHART_3_TITLE = "Webpages with lowest data availibility"
 
 CHART_Y_AXIS_TITLE =  "Webpage Views"

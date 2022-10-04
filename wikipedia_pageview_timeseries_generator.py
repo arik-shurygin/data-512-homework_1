@@ -133,6 +133,10 @@ def generate_cumulative_monthly_pageviews(titles = ARTICLE_TITLES,  start = STAR
             combined_jsons[title] = {}
             continue
         combined_json = combined_json["items"]
+        running_sum_views = 0
+        for month in combined_json:
+            running_sum_views += month["views"]
+            month["views"] = running_sum_views
         combined_jsons[title] = combined_json
         
     return json.dumps(combined_jsons, indent=4)
