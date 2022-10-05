@@ -66,15 +66,22 @@ def fewest_months_of_data_calculator(timeseries):
 
 #this function will take a dictionary containing names and timeseries and plot them all together on a matplotlib plot
 #also will take title of the plot and ylabel of the plot and an output file name to save the image to.
-def time_series_plotter(name_to_timeseries, title, ylabel, output_f_name):
+#if a definite X-Axis is to be set, set xaxis to a non-null value, a list.
+def time_series_plotter(name_to_timeseries, title, ylabel, output_f_name, xaxis = None):
     fig = plt.figure(figsize=(10, 10))
-    ax = fig.add_subplot(1,1,1)  
+    ax = fig.add_subplot(1,1,1)
+    print(xaxis)
+    if xaxis: #if we want to set a definite x axis we can do so.
+        plt.xticks([i for i in range(len(xaxis))],xaxis)
     for name, timeseries in name_to_timeseries.items():
         #timestamps = [datetime.strptime(month["timestamp"], "%Y%M%d%S") for month in timeseries]
         timestamps = [month["timestamp"] for month in timeseries]
         
         views = [month["views"] for month in timeseries]
-        plt.plot(timestamps, views, label=name)
+        if len(timestamps) == 1:
+            plt.scatter(timestamps, views, label=name)
+        else:
+            plt.plot(timestamps, views, label=name)
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=3)) #this will set our x labels not to be so close together and only every 3 months
     plt.legend()
     plt.xticks(rotation=45, ha='right')
@@ -171,11 +178,13 @@ def generate_least_data_chart(desktop_json, mobile_json, output_f_name = CHART_3
 
     num_months_mobile = {}
     for name,timeseries in mobile_json.items():
-        num_months= max_page_view_calculator(timeseries)
+        num_months= fewest_months_of_data_calculator(timeseries)
         num_months_mobile[name] = num_months
     #lets identify which 10 dinosaur had least data on desktop and mobile
     lowest_months_desktop = sorted(num_months_desktop, key=num_months_desktop.get)[:10]
     lowest_months_mobile = sorted(num_months_mobile, key=num_months_mobile.get)[:10]
+    full_data_range = desktop_json[sorted(num_months_desktop,  key=num_months_desktop.get)[-1]]
+    xaxis = [month["timestamp"] for month in full_data_range]
     print(lowest_months_desktop, lowest_months_mobile)
     #lets combine the lowest month count for mobile and desktop together so we can plot it
     name_to_timeseries = {}
@@ -184,7 +193,7 @@ def generate_least_data_chart(desktop_json, mobile_json, output_f_name = CHART_3
 
     for name in lowest_months_mobile:
         name_to_timeseries[name + "_Mobile"] = mobile_json[name]
-    time_series_plotter(name_to_timeseries, chart_title, chart_y_axis , output_f_name)
+    time_series_plotter(name_to_timeseries, chart_title, chart_y_axis , output_f_name, xaxis)
 
 desktop_json, mobile_json = load_data()
 generate_average_chart(desktop_json, mobile_json)
